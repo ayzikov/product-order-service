@@ -1,7 +1,7 @@
 # base
 import os
 from pathlib import Path
-# install
+# installed
 from dotenv import load_dotenv
 
 
@@ -31,6 +31,7 @@ INSTALLED_APPS = [
 
     # установленные
     'rest_framework',
+    'mptt',
 
     # созданные
     'apps.orderserviceapi',
