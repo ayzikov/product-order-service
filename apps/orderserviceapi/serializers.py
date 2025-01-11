@@ -1,7 +1,7 @@
 # installed
 from rest_framework.serializers import ModelSerializer
 # local
-from apps.orderserviceapi.models import Provider, Product, Category
+from apps.orderserviceapi.models import Provider, Product, Category, RemainingStock
 
 
 class ProviderSerializer(ModelSerializer):
@@ -20,3 +20,9 @@ class CategorySerializer(ModelSerializer):
     class Meta:
         model = Category
         fields = "__all__"
+
+
+class RemainingStockSerializer(ModelSerializer):
+    class Meta:
+        model = RemainingStock
+        fields = ["quantity"]

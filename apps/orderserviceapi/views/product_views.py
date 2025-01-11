@@ -6,8 +6,8 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.request import Request
 from rest_framework.response import Response
 # local
-from apps.orderserviceapi.models import Product
-from apps.orderserviceapi.serializers import ProductSerializer
+from apps.orderserviceapi.models import Product, RemainingStock
+from apps.orderserviceapi.serializers import ProductSerializer, RemainingStockSerializer
 
 
 class ProductListView(APIView):
@@ -23,6 +23,8 @@ class ProductListView(APIView):
         serializer = ProductSerializer(data=request.data)
         if serializer.is_valid(raise_exception=True):
             product = serializer.save()
+            # создаем связанную с товаром таблицу остатка на складе
+            RemainingStock.objects.create(product=product)
             response_data = {"result": "the Product has been created",
                              "Product name": product.name}
             return Response(response_data, status=status.HTTP_201_CREATED)
@@ -62,3 +64,22 @@ class ProductDetailView(APIView):
         product.delete()
         data = {"result": f"Product {product_name} deleted"}
         return Response(data)
+
+
+class ProductWarehouseView(APIView):
+    def get(self, request: Request, id: int):
+        """ Остаток товара на складе """
+        product = get_object_or_404(Product, id=id)
+        remaining_stock = RemainingStock.objects.get(product=product)
+        response_data = {f"Количество {product.name} на складе = {remaining_stock.quantity}"}
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    def put(self, request: Request, id: int):
+        """ Добавить товар на склад """
+        product = get_object_or_404(Product, id=id)
+        remaining_stock = RemainingStock.objects.get(product=product)
+        serializer = RemainingStockSerializer(instance=remaining_stock, data=request.data, partial=True)
+        if serializer.is_valid(raise_exception=True):
+            remaining_stock = serializer.save()
+            response_data = {f"Количество {product.name} изменено на {remaining_stock.quantity}"}
+            return Response(response_data, status=status.HTTP_200_OK)

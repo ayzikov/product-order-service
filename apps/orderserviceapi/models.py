@@ -42,7 +42,7 @@ class Product(models.Model):
 
 class RemainingStock(models.Model):
     """ Остаток товара на складе """
-    quantity = models.IntegerField(verbose_name="количество")
+    quantity = models.IntegerField(default=0, verbose_name="количество")
     product = models.OneToOneField(to=Product, on_delete=models.CASCADE)
 
 
