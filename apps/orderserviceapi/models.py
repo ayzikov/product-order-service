@@ -48,7 +48,15 @@ class RemainingStock(models.Model):
 
 class Buyer(AbstractUser):
     """ Покупатель """
-    pass
+    first_name = models.CharField(max_length=150, verbose_name="имя")
+    last_name = models.CharField(max_length=150, verbose_name="фамилия")
+    age = models.IntegerField(verbose_name="возраст", blank=True, null=True)
+    email = models.EmailField(unique=True, null=False)
+    is_verified = models.BooleanField(default=False, verbose_name="подтверждение по email")
+
+    # в поле username нужно вводить email, а не username
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
 
 class Order(models.Model):

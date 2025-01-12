@@ -5,6 +5,7 @@ from rest_framework.routers import DefaultRouter
 from apps.orderserviceapi.views.provider_views import ProviderListView, ProviderDetailView
 from apps.orderserviceapi.views.product_views import ProductListView, ProductDetailView, ProductWarehouseView
 from apps.orderserviceapi.views.category_views import CategoryListView, CategoryDetailView
+from apps.orderserviceapi.views.buyer_views import BuyerView, BuyerConfirmEmailView
 
 
 urlpatterns = [
@@ -20,7 +21,8 @@ urlpatterns = [
     path('providers/', ProviderListView.as_view()),
     path('providers/<int:id>', ProviderDetailView.as_view()),
 
-    # path('users/register/', ),
+    path('users/register/', BuyerView.as_view()),
+    path('confirm-email/<str:token>/<str:uidb64>', BuyerConfirmEmailView.as_view()),
 ]
 
 app_name = 'orderserviceapi'
