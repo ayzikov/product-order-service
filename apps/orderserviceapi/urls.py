@@ -6,13 +6,14 @@ from apps.orderserviceapi.views.provider_views import ProviderListView, Provider
 from apps.orderserviceapi.views.product_views import ProductListView, ProductDetailView, ProductWarehouseView
 from apps.orderserviceapi.views.category_views import CategoryListView, CategoryDetailView
 from apps.orderserviceapi.views.buyer_views import BuyerView, BuyerConfirmEmailView
+from apps.orderserviceapi.views.order_views import OrderView
 
 
 urlpatterns = [
     path('categories/', CategoryListView.as_view()),
     path('categories/<int:id>', CategoryDetailView.as_view()),
 
-    # path('orders/', ),
+    path('orders/', OrderView.as_view()),
 
     path('products/', ProductListView.as_view()),
     path('products/<int:id>', ProductDetailView.as_view()),

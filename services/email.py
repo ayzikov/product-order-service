@@ -10,7 +10,7 @@ from apps.orderserviceapi.models import Buyer
 
 
 def send_verifi_mail(current_domain, buyer_id):
-    # Отправляет письмо на почту
+    # Отправляет письмо на почту при регистрации
     try:
         buyer = get_object_or_404(Buyer, id=buyer_id)
         token = default_token_generator.make_token(buyer)
@@ -26,3 +26,17 @@ def send_verifi_mail(current_domain, buyer_id):
         )
     except Exception:
         raise Exception('Ошибка в функции send_verifi_mail')
+
+def send_order_mail(buyer_id):
+    # Отправляет письмо на почту при создании заказа
+    try:
+        buyer = get_object_or_404(Buyer, id=buyer_id)
+        send_mail(
+            'Уведомление о создании заказа',
+            f'Создан заказ',
+            settings.EMAIL_HOST_USER,
+            [buyer.email],
+            fail_silently=False,
+        )
+    except Exception:
+        raise Exception('Ошибка в функции send_order_mail')
