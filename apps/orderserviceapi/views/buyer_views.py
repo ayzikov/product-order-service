@@ -3,7 +3,9 @@ from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.http import urlsafe_base64_decode
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from drf_spectacular.utils import (extend_schema,
+                                   inline_serializer)
+from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -14,13 +16,36 @@ from services.tasks import send_verifi_mail_task
 
 
 class BuyerView(APIView):
+    # GET
+    @extend_schema(
+        parameters=[],
+        tags=["Buyer"],
+        summary='Все покупатели',
+        description=''
+    )
     def get(self, request: Request):
-        """ Получение всех поставщиков """
+        """ Получение всех покупателей """
         buyers = Buyer.objects.all()
         serializer = BuyerSerializer(instance=buyers, many=True)
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    # POST
+    @extend_schema(
+        request=inline_serializer(
+            name="BuyerPOSTSerializer",
+            fields={
+                "first_name": serializers.CharField(default='first_name'),
+                "last_name": serializers.CharField(default='last_name'),
+                "username": serializers.CharField(default='username'),
+                "email": serializers.CharField(default='email'),
+                "password": serializers.CharField(default='password'),
+            },
+        ),
+        tags=["Buyer"],
+        summary='Регистрация пользователя',
+        description='',
+    )
     def post(self, request: Request):
         """ Регистрация пользователя """
         serializer = BuyerSerializer(data=request.data)
@@ -34,6 +59,7 @@ class BuyerView(APIView):
 
 
 class BuyerConfirmEmailView(APIView):
+    @extend_schema(exclude=True)
     def get(self, request: Request, token, uidb64):
         buyer_id = urlsafe_base64_decode(uidb64)
         buyer = get_object_or_404(Buyer, id=buyer_id)

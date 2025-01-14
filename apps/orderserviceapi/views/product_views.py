@@ -1,8 +1,9 @@
 # installed
 from django.shortcuts import get_object_or_404
-from rest_framework import status
+from drf_spectacular.utils import (extend_schema,
+                                   inline_serializer)
+from rest_framework import status, serializers
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
 from rest_framework.request import Request
 from rest_framework.response import Response
 # local
@@ -11,6 +12,13 @@ from apps.orderserviceapi.serializers import ProductSerializer, RemainingStockSe
 
 
 class ProductListView(APIView):
+    # GET
+    @extend_schema(
+        parameters=[],
+        tags=["Product"],
+        summary='Все товары',
+        description=''
+    )
     def get(self, request: Request):
         """ Получение всех товаров """
         products = Product.objects.all()
@@ -18,6 +26,21 @@ class ProductListView(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    # POST
+    @extend_schema(
+        request=inline_serializer(
+            name="ProductPOSTSerializer",
+            fields={
+                "name": serializers.CharField(default='name'),
+                "price": serializers.IntegerField(default=1),
+                "provider": serializers.IntegerField(default=1),
+                "category": serializers.IntegerField(default=1),
+            },
+        ),
+        tags=["Product"],
+        summary='Создание товара',
+        description='provider - id поставщика, category - id категории',
+    )
     def post(self, request: Request):
         """ Создание товара """
         serializer = ProductSerializer(data=request.data)
@@ -31,12 +54,34 @@ class ProductListView(APIView):
 
 
 class ProductDetailView(APIView):
+    # GET
+    @extend_schema(
+        parameters=[],
+        tags=["Product"],
+        summary='Получение товара',
+        description=''
+    )
     def get(self, request: Request, id: int):
         """ Получение товара """
         product = get_object_or_404(Product, id=id)
         serializer = ProductSerializer(instance=product)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    # PUT
+    @extend_schema(
+        request=inline_serializer(
+            name="ProductPUTSerializer",
+            fields={
+                "name": serializers.CharField(default='name'),
+                "price": serializers.IntegerField(default=1),
+                "provider": serializers.IntegerField(default=1),
+                "category": serializers.IntegerField(default=1),
+            },
+        ),
+        tags=["Product"],
+        summary='Обновление товара',
+        description='provider - id поставщика, category - id категории',
+    )
     def put(self, request: Request, id: int):
         """ Обновление товара """
         product = get_object_or_404(Product, id=id)
@@ -47,6 +92,19 @@ class ProductDetailView(APIView):
                              "Product name": product.name}
             return Response(response_data, status=status.HTTP_200_OK)
 
+    # PUT
+    @extend_schema(
+        request=inline_serializer(
+            name="ProductPATCHSerializer",
+            fields={
+                "name": serializers.CharField(default='name'),
+                "price": serializers.IntegerField(default=1),
+            },
+        ),
+        tags=["Product"],
+        summary='Частичное обновление товара',
+        description='',
+    )
     def patch(self, request: Request, id: int):
         """ Частичное обновление товара """
         product = get_object_or_404(Product, id=id)
@@ -57,6 +115,13 @@ class ProductDetailView(APIView):
                              "Product name": product.name}
             return Response(response_data, status=status.HTTP_200_OK)
 
+    # GET
+    @extend_schema(
+        parameters=[],
+        tags=["Product"],
+        summary='Удаление товара',
+        description=''
+    )
     def delete(self, request: Request, id: int):
         """ Удаление товара """
         product = get_object_or_404(Product, id=id)
@@ -67,6 +132,13 @@ class ProductDetailView(APIView):
 
 
 class ProductWarehouseView(APIView):
+    # GET
+    @extend_schema(
+        parameters=[],
+        tags=["Product Warehouse"],
+        summary='Остаток товара на складе',
+        description=''
+    )
     def get(self, request: Request, id: int):
         """ Остаток товара на складе """
         product = get_object_or_404(Product, id=id)
@@ -74,6 +146,18 @@ class ProductWarehouseView(APIView):
         response_data = {f"Количество {product.name} на складе = {remaining_stock.quantity}"}
         return Response(response_data, status=status.HTTP_200_OK)
 
+    # PUT
+    @extend_schema(
+        request=inline_serializer(
+            name="ProductWarehousePUTSerializer",
+            fields={
+                "quantity": serializers.IntegerField(default=1),
+            },
+        ),
+        tags=["Product Warehouse"],
+        summary='Добавление товара на склад',
+        description='quantity - количество товара, которое надо добавить на склад',
+    )
     def put(self, request: Request, id: int):
         """ Добавить товар на склад """
         product = get_object_or_404(Product, id=id)

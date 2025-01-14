@@ -1,6 +1,7 @@
 # installed
-from django.shortcuts import get_object_or_404
-from rest_framework import status
+from drf_spectacular.utils import (extend_schema,
+                                   inline_serializer)
+from rest_framework import status, serializers
 from rest_framework.views import APIView
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -10,6 +11,13 @@ from apps.orderserviceapi.serializers import OrderSerializer
 
 
 class OrderView(APIView):
+    # GET
+    @extend_schema(
+        parameters=[],
+        tags=["Order"],
+        summary='Все заказы',
+        description=''
+    )
     def get(self, request: Request):
         """ Получение всех заказов """
         orders = Order.objects.all()
@@ -17,6 +25,20 @@ class OrderView(APIView):
 
         return Response(serializer.data, status=status.HTTP_200_OK)
 
+    # POST
+    @extend_schema(
+        request=inline_serializer(
+            name="OrderPOSTSerializer",
+            fields={
+                "buyer": serializers.IntegerField(default=1),
+                "quantity": serializers.IntegerField(default=5),
+                "product": serializers.IntegerField(default=1),
+            },
+        ),
+        tags=["Order"],
+        summary='Создание заказа',
+        description='buyer - id покупателя, quantity - количество товара, product - id товара',
+    )
     def post(self, request: Request):
         """ Создание заказа """
         serializer = OrderSerializer(data=request.data, context={'request': request.data})

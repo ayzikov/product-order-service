@@ -22,7 +22,7 @@ urlpatterns = [
     path('providers/', ProviderListView.as_view()),
     path('providers/<int:id>', ProviderDetailView.as_view()),
 
-    path('users/register/', BuyerView.as_view()),
+    path('users/', BuyerView.as_view()),
     path('confirm-email/<str:token>/<str:uidb64>', BuyerConfirmEmailView.as_view()),
 ]
 
