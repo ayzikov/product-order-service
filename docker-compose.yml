@@ -13,6 +13,10 @@ services:
     depends_on:
       - redis
       - db
+    networks:
+      - npm_default
+      - Re-Action-test
+
   db:
     image: postgres:16
     container_name: Re-Action-postgres
@@ -21,14 +25,16 @@ services:
       - postgres_data:/var/lib/postgresql/data/
     env_file:
       - ./.env
+    networks:
+      - Re-Action-test
 
   redis:
     image: redis:latest
     container_name: Re-Action-redis
     environment:
       - REDIS_PASSWORD=${REDIS_PASSWORD}
-      - REDIS_USER=${REDIS_USER}
-      - REDIS_USER_PASSWORD=${REDIS_USER_PASSWORD}
+      - REDIS_USER=${REDIS_USERNAME}
+      - REDIS_USER_PASSWORD=${REDIS_PASSWORD}
     expose:
       - 6379
     volumes:
@@ -41,7 +47,7 @@ services:
         echo "appendonly yes" >> /usr/local/etc/redis/redis.conf &&
         echo "appendfsync everysec" >> /usr/local/etc/redis/redis.conf &&
         echo "user default on nopass ~* +@all" > /usr/local/etc/redis/users.acl &&
-        echo "user $REDIS_USER on >$REDIS_USER_PASSWORD ~* +@all" >> /usr/local/etc/redis/users.acl &&
+        echo "user $REDIS_USERNAME on >$REDIS_PASSWORD ~* &* +@all" >> /usr/local/etc/redis/users.acl &&
         redis-server /usr/local/etc/redis/redis.conf --aclfile /usr/local/etc/redis/users.acl
       '
     healthcheck:
@@ -52,7 +58,8 @@ services:
     restart: unless-stopped
     tty: true
     stdin_open: true
-
+    networks:
+      - Re-Action-test
 
   celery:
     build: .
@@ -67,7 +74,15 @@ services:
       - db
       - redis
       - web
+    networks:
+      - Re-Action-test
 
 volumes:
   postgres_data:
   static_volume:
+
+networks:
+  Re-Action-test:
+  npm_default:
+    external: true
+

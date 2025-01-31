@@ -1,135 +1,55 @@
+# base
 # installed
-from django.shortcuts import get_object_or_404
-from drf_spectacular.utils import (extend_schema,
-                                   inline_serializer)
-from rest_framework import status, serializers
-from rest_framework.views import APIView
+from functools import partial
+
+from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
+from rest_framework.views import APIView
 # local
+from apps.orderserviceapi import serializers as app_serializers
 from apps.orderserviceapi.models import Provider
-from apps.orderserviceapi.serializers import ProviderSerializer
+from apps.orderserviceapi.selectors import provider_get, provider_get_list
+from apps.orderserviceapi.services.db import provider_create, provider_modify, provider_delete
+from apps.orderserviceapi.services.errors import get_404_error
 
 
-class ProviderListView(APIView):
-    # GET
-    @extend_schema(
-        parameters=[],
-        tags=["Provider"],
-        summary='Все поставщики',
-        description=''
-    )
+class ProviderDetailModifyDeleteView(APIView):
+    def get(self, request: Request, provider_id: int):
+        provider = provider_get(provider_id)
+        if provider is None:
+            get_404_error(Provider)
+
+        data = app_serializers.ProviderOutputDetailSerializer(provider).data
+        return Response(data, status=status.HTTP_200_OK)
+
+    def patch(self, request: Request, provider_id: int):
+        serializer = app_serializers.ProviderModifySerializer(data=request.data, partial=True)
+        serializer.is_valid(raise_exception=True)
+
+        modified_provider = provider_modify(provider_id, serializer.validated_data)
+        data = app_serializers.ProviderOutputDetailSerializer(modified_provider).data
+
+        return Response(data, status=status.HTTP_200_OK)
+    
+    def delete(self, request: Request, provider_id: int):
+        provider_delete(provider_id)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class ProviderListCreateView(APIView):
     def get(self, request: Request):
-        """ Получение всех поставщиков """
-        providers = Provider.objects.all()
-        serializer = ProviderSerializer(instance=providers, many=True)
+        providers_qs = provider_get_list()
+        data = app_serializers.ProviderOutputListSerializer(providers_qs, many=True).data
 
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(data, status=status.HTTP_200_OK)
 
-    # POST
-    @extend_schema(
-        request=inline_serializer(
-            name="ProviderPOSTSerializer",
-            fields={
-                "name": serializers.CharField(default='name'),
-                "country": serializers.CharField(default='country'),
-                "town": serializers.CharField(default='town'),
-                "street": serializers.CharField(default='street'),
-                "building": serializers.IntegerField(default='building'),
-            },
-        ),
-        tags=["Provider"],
-        summary='Создание поставщика',
-        description='',
-    )
+    
     def post(self, request: Request):
-        """ Создание поставщика """
-        serializer = ProviderSerializer(data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            provider = serializer.save()
-            response_data = {"result": "the provider has been created",
-                             "provider name": provider.name}
-            return Response(response_data, status=status.HTTP_201_CREATED)
+        serializer = app_serializers.ProviderCreateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
 
+        provider = provider_create(serializer.validated_data)
+        data = app_serializers.ProviderOutputDetailSerializer(provider).data
 
-class ProviderDetailView(APIView):
-    # GET
-    @extend_schema(
-        parameters=[],
-        tags=["Provider"],
-        summary='Получение поставщика',
-        description=''
-    )
-    def get(self, request: Request, id: int):
-        """ Получение поставщика """
-        provider = get_object_or_404(Provider, id=id)
-        serializer = ProviderSerializer(instance=provider)
-        return Response(serializer.data, status=status.HTTP_200_OK)
-
-    # POST
-    @extend_schema(
-        request=inline_serializer(
-            name="ProviderPUTSerializer",
-            fields={
-                "name": serializers.CharField(default='name'),
-                "country": serializers.CharField(default='country'),
-                "town": serializers.CharField(default='town'),
-                "street": serializers.CharField(default='street'),
-                "building": serializers.IntegerField(default='building'),
-            },
-        ),
-        tags=["Provider"],
-        summary='Обновление поставщика',
-        description='',
-    )
-    def put(self, request: Request, id: int):
-        """ Обновление поставщика """
-        provider = get_object_or_404(Provider, id=id)
-        serializer = ProviderSerializer(instance=provider, data=request.data)
-        if serializer.is_valid(raise_exception=True):
-            provider = serializer.save()
-            response_data = {"result": "the provider has been updated",
-                             "provider name": provider.name}
-            return Response(response_data, status=status.HTTP_200_OK)
-
-    # PATCH
-    @extend_schema(
-        request=inline_serializer(
-            name="ProviderPATCHSerializer",
-            fields={
-                "town": serializers.CharField(default='town'),
-            },
-        ),
-        tags=["Provider"],
-        summary='Частичное обновление поставщика',
-        description='',
-    )
-    def patch(self, request: Request, id: int):
-        """ Частичное обновление поставщика """
-        provider = get_object_or_404(Provider, id=id)
-        serializer = ProviderSerializer(instance=provider, data=request.data, partial=True)
-        if serializer.is_valid(raise_exception=True):
-            provider = serializer.save()
-            response_data = {"result": "the provider has been updated",
-                             "provider name": provider.name}
-            return Response(response_data, status=status.HTTP_200_OK)
-
-    # DELETE
-    @extend_schema(
-        parameters=[],
-        tags=["Provider"],
-        summary='Удаление поставщика',
-        description=''
-    )
-    def delete(self, request: Request, id: int):
-        """ Удаление поставщика """
-        provider = get_object_or_404(Provider, id=id)
-        provider_name = provider.name
-        provider.delete()
-        data = {"result": f"Provider {provider_name} deleted"}
-        return Response(data)
-
-
-# class ProviderViewSet(ModelViewSet):
-#     queryset = Provider.objects.all()
-#     serializer_class = ProviderSerializer
+        return Response(data, status=status.HTTP_201_CREATED)

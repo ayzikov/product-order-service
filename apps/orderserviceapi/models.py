@@ -1,4 +1,5 @@
 # installed
+from django.core.validators import EmailValidator
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.utils import timezone
@@ -11,7 +12,7 @@ class Provider(models.Model):
     country = models.CharField(max_length=200, verbose_name="страна")
     town = models.CharField(max_length=200, verbose_name="город")
     street = models.CharField(max_length=200, verbose_name="улица")
-    building = models.CharField(max_length=200, verbose_name="здание")
+    building = models.IntegerField(verbose_name="здание")
 
 
 class Category(MPTTModel):
@@ -50,8 +51,8 @@ class Buyer(AbstractUser):
     """ Покупатель """
     first_name = models.CharField(max_length=150, verbose_name="имя")
     last_name = models.CharField(max_length=150, verbose_name="фамилия")
-    age = models.IntegerField(verbose_name="возраст", blank=True, null=True)
-    email = models.EmailField(unique=True, null=False)
+    age = models.IntegerField(blank=True, null=True, verbose_name="возраст")
+    email = models.EmailField(validators=[EmailValidator],unique=True, null=False)
     is_verified = models.BooleanField(default=False, verbose_name="подтверждение по email")
 
     # в поле username нужно вводить email, а не username
@@ -70,4 +71,4 @@ class ProductOrder(models.Model):
     quantity = models.IntegerField(verbose_name="количество")
     purchase_price = models.IntegerField(verbose_name="закупочная цена")
     order = models.ForeignKey(to=Order, on_delete=models.CASCADE)
-    product = models.OneToOneField(to=Product, on_delete=models.CASCADE)
+    product = models.ForeignKey(to=Product, on_delete=models.CASCADE)
