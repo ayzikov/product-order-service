@@ -1,4 +1,6 @@
 # installed
+from typing import Tuple, Any
+
 from django.contrib.auth.tokens import default_token_generator
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
@@ -9,25 +11,29 @@ from django.shortcuts import get_object_or_404
 from apps.orderserviceapi.models import Buyer
 
 
-def send_verifi_mail(current_domain, buyer_id):
+def get_activation_url(current_domain, buyer_id) -> tuple[str, str]:
+    buyer = get_object_or_404(Buyer, id=buyer_id)
+    token = default_token_generator.make_token(buyer)
+    uid = urlsafe_base64_encode(force_bytes(buyer.id))
+
+    return f"http://{current_domain}/confirm-email/{token}/{uid}", buyer.email
+
+def send_verifi_mail(current_domain, buyer_id) -> None:
     # Отправляет письмо на почту при регистрации
     try:
-        buyer = get_object_or_404(Buyer, id=buyer_id)
-        token = default_token_generator.make_token(buyer)
-        uid = urlsafe_base64_encode(force_bytes(buyer.id))
-        activation_url = f'http://{current_domain}/confirm-email/{token}/{uid}'
+        activation_url, buyer_email = get_activation_url(current_domain, buyer_id)
         send_mail(
             'Подтвердите свой электронный адрес',
             f'Пожалуйста, перейдите по следующей ссылке, чтобы подтвердить свой адрес электронной почты:\n'
             f'{activation_url}',
             settings.EMAIL_HOST_USER,
-            [buyer.email],
+            [buyer_email],
             fail_silently=False,
         )
     except Exception:
         raise Exception('Ошибка в функции send_verifi_mail')
 
-def send_order_mail(buyer_id):
+def send_order_mail(buyer_id) -> None:
     # Отправляет письмо на почту при создании заказа
     try:
         buyer = get_object_or_404(Buyer, id=buyer_id)

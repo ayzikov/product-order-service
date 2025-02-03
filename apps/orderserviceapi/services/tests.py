@@ -3,7 +3,7 @@
 from faker import Faker
 from factory.django import DjangoModelFactory
 # local
-from apps.orderserviceapi.models import Provider
+from apps.orderserviceapi.models import Provider, Buyer
 
 
 fake = Faker()
@@ -18,3 +18,15 @@ class ProviderFactory(DjangoModelFactory):
 
     class Meta:
         model = Provider
+
+
+class BuyerFactory(DjangoModelFactory):
+    username = fake.user_name()
+    first_name = fake.first_name()
+    last_name = fake.last_name()
+    age = fake.random_int(min=18, max=90)
+    email = "ayzikov070@yandex.ru"
+    password = "mypassword99118822"
+
+    class Meta:
+        model = Buyer

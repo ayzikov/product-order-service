@@ -51,7 +51,7 @@ class Buyer(AbstractUser):
     """ Покупатель """
     first_name = models.CharField(max_length=150, verbose_name="имя")
     last_name = models.CharField(max_length=150, verbose_name="фамилия")
-    age = models.IntegerField(blank=True, null=True, verbose_name="возраст")
+    age = models.IntegerField(verbose_name="возраст")
     email = models.EmailField(validators=[EmailValidator],unique=True, null=False)
     is_verified = models.BooleanField(default=False, verbose_name="подтверждение по email")
 

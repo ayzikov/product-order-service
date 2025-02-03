@@ -12,7 +12,8 @@ class ProviderViewsTest(APITestCase):
     def setUp(self):
         self.url = reverse("orderserviceapi:providers:list_create")
 
-    def test_provider_create_get_list(self):
+    def test_provider_views(self):
+        # проверка создания объекта
         for id in range(1, 3):
             self.provider = ProviderFactory.build()
             self.response_post = self.client.post(

@@ -1,7 +1,7 @@
 # installed
 from celery import shared_task
 # local
-from .email import send_verifi_mail,  send_order_mail
+from apps.orderserviceapi.services.email import send_verifi_mail, send_order_mail
 
 
 @shared_task
