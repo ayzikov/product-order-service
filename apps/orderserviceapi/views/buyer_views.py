@@ -20,3 +20,10 @@ class BuyerRegisterView(APIView):
         data = app_serializers.BuyerOutputDetailSerializer(buyer).data
 
         return Response(data, status=status.HTTP_201_CREATED)
+
+
+class BuyerConfirmEmailView(APIView):
+    def get(self, request: Request, token: str, uid: str):
+        db.buyer_confirm_email(token, uid)
+
+        return Response(status=status.HTTP_204_NO_CONTENT)

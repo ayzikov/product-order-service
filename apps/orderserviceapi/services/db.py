@@ -1,6 +1,9 @@
 # base
 # installed
+from django.contrib.auth.tokens import default_token_generator
 from django.contrib.sites.shortcuts import get_current_site
+from django.utils.http import urlsafe_base64_decode
+from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 # local
 from apps.orderserviceapi import selectors
@@ -34,5 +37,16 @@ def buyer_create(request: Request, data: dict) -> models.Buyer:
     )
 
     return buyer
+
+def buyer_confirm_email(token, uid):
+    buyer_id = urlsafe_base64_decode(uid)
+    buyer = selectors.get_object(models.Buyer, id=buyer_id)
+
+    if default_token_generator.check_token(buyer, token):
+        buyer.is_verified = True
+        buyer.save()
+        return True
+    else:
+        raise ValidationError("Link error")
 
 

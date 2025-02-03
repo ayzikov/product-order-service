@@ -11,6 +11,7 @@ providers_patterns = [
 
 buyers_patterns = [
     path("", buyer_views.BuyerRegisterView.as_view(), name="register"),
+    path('confirm-email/<str:token>/<str:uid>', buyer_views.BuyerConfirmEmailView.as_view(), name="confirm_email"),
 ]
 
 urlpatterns = [

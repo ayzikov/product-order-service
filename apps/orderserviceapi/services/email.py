@@ -2,6 +2,7 @@
 from typing import Tuple, Any
 
 from django.contrib.auth.tokens import default_token_generator
+from django.urls import reverse
 from django.utils.http import urlsafe_base64_encode
 from django.utils.encoding import force_bytes
 from django.conf import settings
@@ -16,7 +17,8 @@ def get_activation_url(current_domain, buyer_id) -> tuple[str, str]:
     token = default_token_generator.make_token(buyer)
     uid = urlsafe_base64_encode(force_bytes(buyer.id))
 
-    return f"http://{current_domain}/confirm-email/{token}/{uid}", buyer.email
+    path = reverse("orderserviceapi:buyers:confirm_email", args=[token, uid])
+    return f"http://{current_domain}{path}", buyer.email
 
 def send_verifi_mail(current_domain, buyer_id) -> None:
     # Отправляет письмо на почту при регистрации
