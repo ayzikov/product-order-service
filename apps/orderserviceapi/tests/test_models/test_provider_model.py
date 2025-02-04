@@ -1,10 +1,12 @@
 # installed
-from django.test import TestCase
+from django.test import TransactionTestCase
 # local
 from apps.orderserviceapi.models import Provider
 
 
-class ProviderModelTest(TestCase):
+class ProviderModelTest(TransactionTestCase):
+    reset_sequences = True
+
     def setUp(self):
         """
         Создание 2-х экземпляров модели Provider
@@ -14,14 +16,14 @@ class ProviderModelTest(TestCase):
             country="country1",
             town="town1",
             street="street1",
-            building="building1"
+            building=1
         )
         self.provider_2 = Provider(
             name="provider2",
             country="country2",
             town="town2",
             street="street2",
-            building="building2"
+            building=1
         )
 
     def test_create_provider(self):

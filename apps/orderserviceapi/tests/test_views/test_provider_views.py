@@ -2,13 +2,15 @@
 # installed
 from django.urls import reverse
 from rest_framework import status
-from rest_framework.test import APITestCase
+from rest_framework.test import APITransactionTestCase
 # local
 from apps.orderserviceapi.models import Provider
 from apps.orderserviceapi.services.tests import ProviderFactory
 
 
-class ProviderViewsTest(APITestCase):
+class ProviderViewsTest(APITransactionTestCase):
+    reset_sequences = True
+
     def setUp(self):
         self.url_list_create = reverse("orderserviceapi:providers:list_create")
         self.url = reverse("orderserviceapi:providers:detail_modify_delete", args=[1])

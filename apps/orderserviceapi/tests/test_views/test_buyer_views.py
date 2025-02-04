@@ -4,13 +4,15 @@ from django.contrib.auth.tokens import default_token_generator
 from django.urls import reverse
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
-from rest_framework.test import APITestCase
+from rest_framework.test import APITransactionTestCase
 # local
 from apps.orderserviceapi.models import Buyer
 from apps.orderserviceapi.services.tests import BuyerFactory
 
 
-class BuyerViewsTest(APITestCase):
+class BuyerViewsTest(APITransactionTestCase):
+    reset_sequences = True
+
     def setUp(self):
         self.register_url = reverse("orderserviceapi:buyers:register")
         self.buyer = BuyerFactory.build()

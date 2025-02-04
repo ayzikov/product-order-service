@@ -1,11 +1,13 @@
 # base
 # installed
-from django.test import TestCase
+from django.test import TransactionTestCase
 # local
 from apps.orderserviceapi.models import Buyer
 
 
-class BuyerModelTest(TestCase):
+class BuyerModelTest(TransactionTestCase):
+    reset_sequences = True
+
     def setUp(self):
         """
         Создание buyer

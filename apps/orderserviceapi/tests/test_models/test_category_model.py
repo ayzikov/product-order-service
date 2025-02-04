@@ -1,10 +1,12 @@
 # installed
-from django.test import TestCase
+from django.test import TransactionTestCase
 # local
 from apps.orderserviceapi.models import Category
 
 
-class CategoryModelTest(TestCase):
+class CategoryModelTest(TransactionTestCase):
+    reset_sequences = True
+
     def setUp(self):
         """
         Создание одной родительской и 2-х дочерних categories

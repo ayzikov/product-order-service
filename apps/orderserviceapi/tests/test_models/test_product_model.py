@@ -1,11 +1,13 @@
 # base
 # installed
-from django.test import TestCase
+from django.test import TransactionTestCase
 # local
 from apps.orderserviceapi.models import Product, Provider, Category, RemainingStock
 
 
-class ProductModelTest(TestCase):
+class ProductModelTest(TransactionTestCase):
+    reset_sequences = True
+
     def setUp(self):
         """
         Создание provider, category и product
@@ -15,7 +17,7 @@ class ProductModelTest(TestCase):
             country="country1",
             town="town1",
             street="street1",
-            building="building1"
+            building=1
         )
         self.category = Category(
             name="category1"
