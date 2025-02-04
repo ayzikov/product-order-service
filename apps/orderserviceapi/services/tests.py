@@ -1,9 +1,10 @@
 # base
 # installed
+import factory
 from faker import Faker
 from factory.django import DjangoModelFactory
 # local
-from apps.orderserviceapi.models import Provider, Buyer
+from apps.orderserviceapi import models
 
 
 fake = Faker()
@@ -17,7 +18,7 @@ class ProviderFactory(DjangoModelFactory):
     building = fake.building_number()
 
     class Meta:
-        model = Provider
+        model = models.Provider
 
 
 class BuyerFactory(DjangoModelFactory):
@@ -29,4 +30,35 @@ class BuyerFactory(DjangoModelFactory):
     password = "mypassword99118822"
 
     class Meta:
-        model = Buyer
+        model = models.Buyer
+
+
+class CategoryFactory(DjangoModelFactory):
+    name = fake.name()
+    parent = factory.SubFactory(
+        'apps.orderserviceapi.services.tests.CategoryFactory',
+        parent=None  # по умолчанию создаем корневую категорию
+    )
+
+    # установка родителя при создании категории
+    @factory.post_generation
+    def set_parent(self, create, extracted, **kwargs):
+        if not create:
+            return
+
+        if extracted:
+            self.parent = extracted
+            self.save()
+
+    class Meta:
+        model = models.Category
+
+
+class ProductFactory(DjangoModelFactory):
+    name = fake.file_name()
+    price = fake.random_int(min=1000, max=100000)
+    provider = factory.SubFactory("apps.orderserviceapi.services.tests.ProviderFactory")
+    category = factory.SubFactory("apps.orderserviceapi.services.tests.CategoryFactory")
+
+    class Meta:
+        model = models.Product
