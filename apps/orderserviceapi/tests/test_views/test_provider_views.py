@@ -10,14 +10,15 @@ from apps.orderserviceapi.services.tests import ProviderFactory
 
 class ProviderViewsTest(APITestCase):
     def setUp(self):
-        self.url = reverse("orderserviceapi:providers:list_create")
+        self.url_list_create = reverse("orderserviceapi:providers:list_create")
+        self.url = reverse("orderserviceapi:providers:detail_modify_delete", args=[1])
 
     def test_provider_views(self):
         # проверка создания объекта
         for id in range(1, 3):
             self.provider = ProviderFactory.build()
             self.response_post = self.client.post(
-                path=self.url,
+                path=self.url_list_create,
                 data={
                     "name": self.provider.name,
                     "country": self.provider.country,
@@ -29,7 +30,8 @@ class ProviderViewsTest(APITestCase):
             # проверка статуса ответа
             self.assertEqual(status.HTTP_201_CREATED, self.response_post.status_code)
             # проверка полей созданного объекта
-            response_get_detail = self.client.get(f"{self.url}{id}")
+            self.url_detail_modify_delete = reverse("orderserviceapi:providers:detail_modify_delete", args=[id])
+            response_get_detail = self.client.get(self.url_detail_modify_delete)
 
             self.assertEqual(self.response_post.data.get("name"), response_get_detail.data.get("name"))
             self.assertEqual(self.response_post.data.get("country"), response_get_detail.data.get("country"))
@@ -37,20 +39,17 @@ class ProviderViewsTest(APITestCase):
             self.assertEqual(self.response_post.data.get("street"), response_get_detail.data.get("street"))
             self.assertEqual(self.response_post.data.get("building"), response_get_detail.data.get("building"))
 
-        response_get_list = self.client.get(self.url)
         # проверка создания 2-х объектов
+        response_get_list = self.client.get(self.url_list_create)
         self.assertEqual(len(response_get_list.data), 2)
 
         # проверка изменения объекта
-        self.client.patch(
-            f"{self.url}1",
-            data={"name": "modified_name"}
-        )
+        self.client.patch(self.url, data={"name": "modified_name"})
         modified_provider = Provider.objects.get(id=1)
         self.assertEqual(modified_provider.name, "modified_name")
 
         # проверка удаления объекта
-        self.client.delete(f"{self.url}1")
+        self.client.delete(self.url)
         self.assertEqual(Provider.objects.all().count(), 1)
 
 
