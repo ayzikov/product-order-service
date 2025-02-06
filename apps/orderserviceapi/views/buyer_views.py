@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 # local
 from apps.orderserviceapi import serializers as app_serializers
 from apps.orderserviceapi.models import Buyer
-from apps.orderserviceapi.services import db
+from apps.orderserviceapi.services import views_adapter
 
 
 class BuyerRegisterView(APIView):
@@ -19,7 +19,7 @@ class BuyerRegisterView(APIView):
         serializer = app_serializers.BuyerCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        buyer = db.buyer_create(request, serializer.validated_data)
+        buyer = views_adapter.buyer_create(request, serializer.validated_data)
 
         data = app_serializers.BuyerOutputDetailSerializer(buyer).data
 
@@ -32,6 +32,6 @@ class BuyerConfirmEmailView(APIView):
         Подтверждение email
         """
 
-        db.buyer_confirm_email(token, uid)
+        views_adapter.buyer_confirm_email(token, uid)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
