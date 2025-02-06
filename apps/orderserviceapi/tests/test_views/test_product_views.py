@@ -5,7 +5,7 @@ from rest_framework.test import APITransactionTestCase
 from rest_framework import status
 # local
 from apps.orderserviceapi.models import Product, RemainingStock
-from apps.orderserviceapi.services.tests import ProductFactory
+from apps.orderserviceapi.services.tests import ProductFactory, ProviderFactory, CategoryFactory
 
 
 class ProductViewsTest(APITransactionTestCase):
@@ -15,7 +15,10 @@ class ProductViewsTest(APITransactionTestCase):
         self.url_list_create = reverse("orderserviceapi:products:list_create")
         self.url_detail_modify_delete = reverse("orderserviceapi:products:detail_modify_delete", args=[1])
         self.url_stock = reverse("orderserviceapi:products:stock", args=[1])
-        self.product = ProductFactory().build()
+
+        self.product = ProductFactory.build()
+        self.provider = ProviderFactory()
+        self.category = CategoryFactory()
 
     def test_product_views(self):
         # ПРОВЕРКА СОЗДАНИЯ ТОВАРА
@@ -24,8 +27,8 @@ class ProductViewsTest(APITransactionTestCase):
             data={
                 "name": self.product.name,
                 "price": self.product.price,
-                "provider": self.product.provider,
-                "category": self.product.category,
+                "provider": self.provider.id,
+                "category": self.category.id,
             }
         )
         # проверяем код ответа
@@ -34,8 +37,8 @@ class ProductViewsTest(APITransactionTestCase):
         response_detail = self.client.get(self.url_detail_modify_delete)
         self.assertEqual(self.product.name, response_detail.data.get("name"))
         self.assertEqual(self.product.price, response_detail.data.get("price"))
-        self.assertEqual(self.product.provider, response_detail.data.get("provider"))
-        self.assertEqual(self.product.category, response_detail.data.get("category"))
+        self.assertEqual(self.provider.id, response_detail.data.get("provider"))
+        self.assertEqual(self.category.id, response_detail.data.get("category"))
 
         # ПРОВЕРКА ИЗМЕНЕНИЯ ТОВАРА
         self.client.patch(
@@ -56,7 +59,7 @@ class ProductViewsTest(APITransactionTestCase):
         )
         # получаю RemainingStock, который должен создаться вместе с товаром
         # и проверяю количество
-        self.remaining_stock = RemainingStock.objects.get(product=self.product)
+        self.remaining_stock = RemainingStock.objects.get(product=self.product.id)
         self.assertEqual(5, self.remaining_stock.quantity)
 
         # ПРОВЕРКА УДАЛЕНИЯ ТОВАРА

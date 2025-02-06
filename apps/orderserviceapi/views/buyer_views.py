@@ -12,6 +12,10 @@ from apps.orderserviceapi.services import db
 
 class BuyerRegisterView(APIView):
     def post(self, request: Request):
+        """
+        Регистрация
+        """
+
         serializer = app_serializers.BuyerCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
@@ -24,6 +28,10 @@ class BuyerRegisterView(APIView):
 
 class BuyerConfirmEmailView(APIView):
     def get(self, request: Request, token: str, uid: str):
+        """
+        Подтверждение email
+        """
+
         db.buyer_confirm_email(token, uid)
 
         return Response(status=status.HTTP_204_NO_CONTENT)
