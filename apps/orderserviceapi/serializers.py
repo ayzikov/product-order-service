@@ -3,7 +3,7 @@
 from rest_framework import serializers
 # local
 from apps.orderserviceapi import models
-from apps.orderserviceapi import db
+from apps.orderserviceapi import selectors
 
 
 # PROVIDER
@@ -56,7 +56,7 @@ class ProductOutputDetailSerializer(serializers.ModelSerializer):
         """
         Получаем количество товара на складе для вывода в ответе
         """
-        return db.product_remaining_stock_get(obj.id).quantity
+        return selectors.product_remaining_stock_get(obj.id).quantity
 
 
 class ProductOutputListSerializer(serializers.ModelSerializer):

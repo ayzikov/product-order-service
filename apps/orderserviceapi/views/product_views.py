@@ -7,10 +7,10 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 # local
-from apps.orderserviceapi import db
+from apps.orderserviceapi import selectors
 from apps.orderserviceapi import serializers as app_serializers
 from apps.orderserviceapi.models import Product
-from apps.orderserviceapi.services import views_adapter
+from apps.orderserviceapi.services import db
 from apps.orderserviceapi.services.errors import get_404_error
 
 
@@ -19,7 +19,7 @@ class ProductDetailModifyDeleteView(APIView):
         """
         Получение детальной информации
         """
-        product = db.product_get(product_id)
+        product = selectors.product_get(product_id)
         if product is None:
             get_404_error(Product)
 
@@ -34,7 +34,7 @@ class ProductDetailModifyDeleteView(APIView):
         serializer = app_serializers.ProductModifySerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
 
-        product = views_adapter.product_modify(serializer.validated_data, product_id)
+        product = db.product_modify(serializer.validated_data, product_id)
         data = app_serializers.ProductOutputDetailSerializer(product).data
         return Response(data, status=status.HTTP_200_OK)
 
@@ -42,7 +42,7 @@ class ProductDetailModifyDeleteView(APIView):
         """
         Удаление
         """
-        views_adapter.product_delete(product_id)
+        db.product_delete(product_id)
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -60,7 +60,7 @@ class ProductListCreateView(APIView):
         serializer = app_serializers.ProductCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        product = views_adapter.product_create(serializer.validated_data)
+        product = db.product_create(serializer.validated_data)
         data = app_serializers.ProductOutputDetailSerializer(product).data
 
         return Response(data, status=status.HTTP_201_CREATED)
@@ -78,7 +78,7 @@ class ProductStockView(APIView):
         serializer = app_serializers.ProductRemainingStockDetailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        product = views_adapter.product_remaining_stock_add(serializer.validated_data, product_id)
+        product = db.product_remaining_stock_add(serializer.validated_data, product_id)
         data = app_serializers.ProductOutputDetailSerializer(product).data
 
         return Response(data, status=status.HTTP_200_OK)

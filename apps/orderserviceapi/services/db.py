@@ -6,7 +6,7 @@ from django.utils.http import urlsafe_base64_decode
 from rest_framework.exceptions import ValidationError
 from rest_framework.request import Request
 # local
-from apps.orderserviceapi import db
+from apps.orderserviceapi import selectors
 from apps.orderserviceapi import models
 from apps.orderserviceapi.services import errors, tasks
 
@@ -33,7 +33,7 @@ def provider_delete(provider_id: int) -> None:
     Удаление поставщика
     """
 
-    provider = db.provider_get(provider_id)
+    provider = selectors.provider_get(provider_id)
     if provider is None:
         errors.get_404_error(models.Provider)
     provider.delete()
@@ -60,7 +60,7 @@ def buyer_confirm_email(token, uid) -> bool | None:
     """
 
     buyer_id = urlsafe_base64_decode(uid)
-    buyer = db.get_object(models.Buyer, id=buyer_id)
+    buyer = selectors.get_object(models.Buyer, id=buyer_id)
 
     if default_token_generator.check_token(buyer, token):
         buyer.is_verified = True
@@ -102,11 +102,11 @@ def product_remaining_stock_add(data: dict, product_id: int) -> models.Product:
     Добавление товара на склад
     """
 
-    remaining_stock = db.product_remaining_stock_get(product_id)
+    remaining_stock = selectors.product_remaining_stock_get(product_id)
     remaining_stock.quantity += data.get("quantity")
     remaining_stock.save()
 
-    product = db.product_get(product_id)
+    product = selectors.product_get(product_id)
     return product
 
 def product_delete(product_id: int) -> None:
@@ -114,7 +114,7 @@ def product_delete(product_id: int) -> None:
     Удаление товара
     """
 
-    product = db.product_get(product_id)
+    product = selectors.product_get(product_id)
     if product is None:
         errors.get_404_error(models.Product)
     product.delete()
