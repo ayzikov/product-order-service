@@ -11,21 +11,21 @@ fake = Faker()
 
 
 class ProviderFactory(DjangoModelFactory):
-    name = fake.company() 
-    country = fake.country() 
-    town = fake.city() 
-    street = fake.street_name() 
-    building = fake.building_number()
+    name = factory.LazyFunction(lambda: fake.company())
+    country = factory.LazyFunction(lambda: fake.country())
+    town = factory.LazyFunction(lambda: fake.city())
+    street = factory.LazyFunction(lambda: fake.street_name())
+    building = factory.LazyFunction(lambda: fake.building_number())
 
     class Meta:
         model = models.Provider
 
 
 class BuyerFactory(DjangoModelFactory):
-    username = fake.user_name()
-    first_name = fake.first_name()
-    last_name = fake.last_name()
-    age = fake.random_int(min=18, max=90)
+    username = factory.LazyFunction(lambda: fake.user_name())
+    first_name = factory.LazyFunction(lambda: fake.first_name())
+    last_name = factory.LazyFunction(lambda: fake.last_name())
+    age = factory.LazyFunction(lambda: fake.random_int(min=18, max=90))
     email = "ayzikov070@yandex.ru"
     password = "mypassword99118822"
 
@@ -34,7 +34,7 @@ class BuyerFactory(DjangoModelFactory):
 
 
 class CategoryFactory(DjangoModelFactory):
-    name = fake.name()
+    name = factory.LazyFunction(lambda: fake.name())
     parent = factory.SubFactory(
         'apps.orderserviceapi.services.tests.CategoryFactory',
         parent=None  # по умолчанию создаем корневую категорию
@@ -55,10 +55,17 @@ class CategoryFactory(DjangoModelFactory):
 
 
 class ProductFactory(DjangoModelFactory):
-    name = fake.file_name()
-    price = fake.random_int(min=1000, max=100000)
+    name = factory.LazyFunction(lambda: fake.file_name())
+    price = factory.LazyFunction(lambda: fake.random_int(min=1000, max=100000))
     provider = factory.SubFactory("apps.orderserviceapi.services.tests.ProviderFactory")
     category = factory.SubFactory("apps.orderserviceapi.services.tests.CategoryFactory")
 
     class Meta:
         model = models.Product
+
+
+class OrderFactory(DjangoModelFactory):
+    buyer = factory.SubFactory("apps.orderserviceapi.services.tests.BuyerFactory")
+
+    class Meta:
+        model = models.Order

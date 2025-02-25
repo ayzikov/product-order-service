@@ -53,8 +53,8 @@ class ProviderListCreateView(APIView):
         Получение списка
         """
 
-        providers_qs = selectors.provider_get_list()
-        data = app_serializers.ProviderOutputListSerializer(providers_qs, many=True).data
+        providers_list = selectors.provider_get_list()
+        data = app_serializers.ProviderOutputListSerializer(providers_list, many=True).data
 
         return Response(data, status=status.HTTP_200_OK)
 

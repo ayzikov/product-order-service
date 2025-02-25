@@ -1,8 +1,16 @@
 # installed
 from django.urls import path, include
 # local
-from apps.orderserviceapi.views import provider_views, buyer_views, product_views
+from apps.orderserviceapi.views import provider_views, buyer_views, product_views, order_views
 
+
+orders_patterns = [
+    path("", order_views.OrderListCreateView.as_view(), name="list_create"),
+    path("<int:order_id>", order_views.OrderDetailModifyDeleteView.as_view(), name="detail_modify_delete"),
+    path("<int:order_id>/confirm", order_views.OrderConfirmView.as_view(), name="confirm"),
+    path("<int:order_id>/cancel", order_views.OrderCancelView.as_view(), name="cancel"),
+    path("<int:order_id>/product/<int:product_id>", order_views.OrderAddProductView.as_view(), name="add_product"),
+]
 
 products_patterns = [
     path("", product_views.ProductListCreateView.as_view(), name="list_create"),
@@ -21,6 +29,7 @@ buyers_patterns = [
 ]
 
 urlpatterns = [
+    path('orders/', include((orders_patterns, 'orders'))),
     path('products/', include((products_patterns, 'products'))),
     path('providers/', include((providers_patterns, 'providers'))),
     path('buyers/', include((buyers_patterns, 'buyers'))),

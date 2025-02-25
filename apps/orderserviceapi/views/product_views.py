@@ -78,7 +78,7 @@ class ProductStockView(APIView):
         serializer = app_serializers.ProductRemainingStockDetailSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
 
-        product = db.product_remaining_stock_add(serializer.validated_data, product_id)
+        product = db.product_remaining_stock_add(serializer.validated_data.get("quantity"), product_id)
         data = app_serializers.ProductOutputDetailSerializer(product).data
 
         return Response(data, status=status.HTTP_200_OK)

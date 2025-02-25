@@ -13,17 +13,17 @@ from apps.orderserviceapi.services import errors, tasks
 
 # PROVIDER
 def provider_create(data: dict) -> models.Provider:
-    # Создание поставщика
+    """ Создание поставщика """
     provider = models.Provider.objects.create(**data)
     return provider
 
 def provider_modify(provider_id: int, data: dict) -> models.Provider:
-    # Изменение поставщика
+    """ Изменение поставщика """
     models.Provider.objects.filter(id=provider_id).update(**data)
     return selectors.provider_get(provider_id)
 
 def provider_delete(provider_id: int) -> None:
-    # Удаление поставщика
+    """ Удаление поставщика """
     provider = selectors.provider_get(provider_id)
     if provider is None:
         errors.get_404_error(models.Provider)
@@ -32,7 +32,7 @@ def provider_delete(provider_id: int) -> None:
 
 # BUYER
 def buyer_create(request: Request, data: dict) -> models.Buyer:
-    # Создание покупателя
+    """ Создание покупателя """
     buyer = models.Buyer.objects.create_user(**data)
     # запуск таски на отправку письма подтверждения
     tasks.send_verifi_mail_task.delay(
@@ -43,7 +43,7 @@ def buyer_create(request: Request, data: dict) -> models.Buyer:
     return buyer
 
 def buyer_confirm_email(token, uid) -> bool | None:
-    # Подтверждение email
+    """ Подтверждение email """
     buyer_id = urlsafe_base64_decode(uid)
     buyer = selectors.buyer_get(buyer_id)
 
@@ -56,35 +56,101 @@ def buyer_confirm_email(token, uid) -> bool | None:
 
 
 # PRODUCT
-def remaining_stock_create(product: models.Product) -> models.RemainingStock:
-    # Создание remaining stock
-    remaining_stock = models.RemainingStock.objects.create(product=product)
-    return remaining_stock
-
 def product_create(data: dict) -> models.Product:
-    # Создание товара
+    """ Создание товара """
     product = models.Product.objects.create(**data)
-    remaining_stock_create(product)
+    remaining_stock_create(product.id)
 
     return product
 
+def remaining_stock_create(product_id: int) -> models.RemainingStock:
+    """ Создание remaining stock """
+    remaining_stock = models.RemainingStock.objects.create(product_id=product_id)
+    return remaining_stock
+
 def product_modify(data: dict, product_id: int) -> models.Product:
-    # Изменение товара
+    """ Изменение товара """
     models.Product.objects.filter(id=product_id).update(**data)
     return selectors.product_get(product_id)
 
-def product_remaining_stock_add(data: dict, product_id: int) -> models.Product:
-    # Добавление товара на склад
+def product_remaining_stock_add(quantity: int, product_id: int) -> models.Product:
+    """ Добавление товара на склад """
     remaining_stock = selectors.product_remaining_stock_get(product_id)
-    remaining_stock.quantity += data.get("quantity")
+    remaining_stock.quantity += quantity
+    remaining_stock.save()
+
+    product = selectors.product_get(product_id)
+    return product
+
+def product_remaining_stock_reduce(data: dict, product_id: int) -> models.Product:
+    """ Убрать товар со склада """
+    remaining_stock = selectors.product_remaining_stock_get(product_id)
+    remaining_stock.quantity -= data.get("quantity")
     remaining_stock.save()
 
     product = selectors.product_get(product_id)
     return product
 
 def product_delete(product_id: int) -> None:
-    # Удаление товара
+    """ Удаление товара """
     product = selectors.product_get(product_id)
     if product is None:
         errors.get_404_error(models.Product)
     product.delete()
+
+
+# ORDER
+def order_create(data: dict) -> models.Order:
+    """ Создание заказа """
+    order = models.Order.objects.create(**data)
+
+    # отправка email покупателю
+
+    #==========================
+
+    return order
+
+def product_in_order_create(data: dict, order_id: int, product_id: int) -> models.ProductOrder:
+    """ Создание ProductInOrder """
+    # получение остатка товара на складе и товар
+    product = selectors.product_get(product_id)
+    product_remaining_stock = selectors.product_remaining_stock_get(product_id)
+    # проверка на количество товара
+    quantity = data.get("quantity")
+    if product_remaining_stock.quantity < quantity:
+        # вызываем ошибку
+        errors.get_product_order_quantity_error()
+
+    # при добавлении товара в заказ вычитаем количество товара на складе
+    product_remaining_stock_reduce(data, product_id)
+
+    # создаем ProductOrder
+    product_order = models.ProductOrder.objects.create(
+        quantity=quantity,
+        purchase_price=product.price,
+        order_id=order_id,
+        product_id=product_id
+    )
+    return product_order
+
+
+def order_confirm(order_id: int) -> None:
+    """ Подтверждение заказа """
+    order = selectors.order_get(order_id)
+    order.delete()
+
+def order_cancel(order_id: int) -> None:
+    """ Отмена заказа """
+    # возвращаем количество товара на склад
+    #   - получаем список товаров, которые находятся в заказе
+    #   - берем количество товара из заказа и добавляем его к количеству товара на складе
+    #     с помощью функции product_remaining_stock_add
+    products_in_order_list = selectors.products_in_order_get_list(order_id)
+    for product_in_order in products_in_order_list:
+        quantity = product_in_order.product.quantity
+        product_id = product_in_order.product.id
+        product_remaining_stock_add(quantity, product_id)
+
+    # удаляем заказ
+    order = selectors.order_get(order_id)
+    order.delete()

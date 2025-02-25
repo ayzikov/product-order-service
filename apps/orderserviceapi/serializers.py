@@ -53,9 +53,7 @@ class ProductOutputDetailSerializer(serializers.ModelSerializer):
         fields = ["name", "price", "provider", "category", "quantity"]
 
     def get_quantity(self, obj):
-        """
-        Получаем количество товара на складе для вывода в ответе
-        """
+        """ Получаем количество товара на складе для вывода в ответе """
         return selectors.product_remaining_stock_get(obj.id).quantity
 
 
@@ -80,4 +78,35 @@ class ProductModifySerializer(serializers.ModelSerializer):
 class ProductRemainingStockDetailSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.RemainingStock
+        fields = ["quantity"]
+
+
+# ORDER
+class OrderOutputDetailSerializer(serializers.ModelSerializer):
+    products_order = serializers.SerializerMethodField()
+
+    class Meta:
+        model = models.Order
+        fields = ["buyer", "datetime", "products_order"]
+
+    def get_products_order(self, obj):
+        products_order_list = selectors.products_in_order_get_list(order_id=obj.id)
+        return [ProductOrderOutputDetailSerializer(product_order).data for product_order in products_order_list]
+
+
+class OrderCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Order
+        fields = ["buyer"]
+
+
+class ProductOrderOutputDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductOrder
+        fields = ["quantity", "purchase_price", "product"]
+
+
+class OrderAddProductSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductOrder
         fields = ["quantity"]
