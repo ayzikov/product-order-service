@@ -110,3 +110,16 @@ class OrderAddProductSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProductOrder
         fields = ["quantity"]
+
+
+# CATEGORY
+class CategoryCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Category
+        exclude = ["id"]
+
+
+class CategoryOutputDetailSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Category
+        fields = "__all__"
