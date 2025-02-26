@@ -147,8 +147,8 @@ def order_cancel(order_id: int) -> None:
     #     с помощью функции product_remaining_stock_add
     products_in_order_list = selectors.products_in_order_get_list(order_id)
     for product_in_order in products_in_order_list:
-        quantity = product_in_order.product.quantity
         product_id = product_in_order.product.id
+        quantity = product_in_order.quantity
         product_remaining_stock_add(quantity, product_id)
 
     # удаляем заказ

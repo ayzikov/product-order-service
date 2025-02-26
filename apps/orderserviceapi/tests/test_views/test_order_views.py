@@ -28,7 +28,8 @@ class OrderViewsTest(APITransactionTestCase):
         self.url_confirm = reverse("orderserviceapi:orders:confirm", args=[1])
         self.url_cancel = reverse("orderserviceapi:orders:cancel", args=[2])
 
-        self.url_add_product_in_order = reverse("orderserviceapi:orders:add_product", args=[1, 1])
+        self.url_add_product_in_order_1 = reverse("orderserviceapi:orders:add_product", args=[1, 1])
+        self.url_add_product_in_order_2 = reverse("orderserviceapi:orders:add_product", args=[2, 1])
 
 
     def test_order_views(self):
@@ -55,21 +56,22 @@ class OrderViewsTest(APITransactionTestCase):
         self.assertEqual(self.buyer_1.id, response_detail.data.get("buyer"))
 
         # ПРОВЕРКА ДОБАВЛЕНИЯ ТОВАРА В ЗАКАЗ
-        # добавляем товар в первый заказ и проверяем что количество товара на складе изменилось
+        # добавляем товар в первый заказ и проверяем что количество товара на складе изменилось и создался ProductOrder
         response_add_product_1 = self.client.post(
-            path=self.url_add_product_in_order,
+            path=self.url_add_product_in_order_1,
             data={
                 "quantity": 6
             }
         )
         self.assertEqual(response_add_product_1.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(1, models.ProductOrder.objects.all().count())
 
         product_remaining_stock = selectors.product_remaining_stock_get(self.product.id)
         self.assertEqual(product_remaining_stock.quantity, 4)
 
         # добавляем в заказ больше товара чем есть на складе и проверяем что сервис выдал ошибку
         response_add_product_2 = self.client.post(
-            path=self.url_add_product_in_order,
+            path=self.url_add_product_in_order_1,
             data={
                 "quantity": 6
             }
@@ -78,12 +80,13 @@ class OrderViewsTest(APITransactionTestCase):
 
         # добавляем товар во второй заказ
         response_add_product_3 = self.client.post(
-            path=self.url_add_product_in_order,
+            path=self.url_add_product_in_order_2,
             data={
                 "quantity": 4
             }
         )
         self.assertEqual(response_add_product_3.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(2, models.ProductOrder.objects.all().count())
 
         product_remaining_stock = selectors.product_remaining_stock_get(self.product.id)
         self.assertEqual(product_remaining_stock.quantity, 0)

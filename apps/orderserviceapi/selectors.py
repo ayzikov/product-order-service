@@ -52,5 +52,4 @@ def product_in_order_get(order_id: int, product_id: int) -> models.ProductOrder:
     return get_object(models.ProductOrder, order=order_id, product=product_id)
 
 def products_in_order_get_list(order_id: int) -> list:
-    print(get_list_or_404(models.ProductOrder))
     return get_objects_list(models.ProductOrder, order_id=order_id)

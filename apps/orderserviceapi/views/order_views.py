@@ -21,7 +21,7 @@ class OrderDetailModifyDeleteView(APIView):
             get_404_error(Order)
         data = app_serializers.OrderOutputDetailSerializer(order).data
 
-        return Response(data, status=status.HTTP_201_CREATED)
+        return Response(data, status=status.HTTP_200_OK)
 
 
 class OrderListCreateView(APIView):
