@@ -8,14 +8,14 @@ from apps.orderserviceapi import selectors
 from apps.orderserviceapi.services import db
 
 
-class OrderViewsTest(APITransactionTestCase):
+class CategoryViewsTest(APITransactionTestCase):
     reset_sequences = True
 
     def setUp(self):
         """
         устанавливаем urls
         """
-        self.url_create = "str"
+        self.url_create = reverse("orderserviceapi:categories:create")
 
     def test_category_views(self):
         """
@@ -28,7 +28,7 @@ class OrderViewsTest(APITransactionTestCase):
         # создание категорий
         response_post_1 = self.client.post(
             path=self.url_create,
-            data={"name": "main", "parent": 1}
+            data={"name": "main"}
         )
         response_post_2 = self.client.post(
             path=self.url_create,

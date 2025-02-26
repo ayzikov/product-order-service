@@ -53,3 +53,8 @@ def product_in_order_get(order_id: int, product_id: int) -> models.ProductOrder:
 
 def products_in_order_get_list(order_id: int) -> list:
     return get_objects_list(models.ProductOrder, order_id=order_id)
+
+
+# CATEGORY
+def category_get(category_id: int) -> models.Category:
+    return get_object(models.Category, id=category_id)

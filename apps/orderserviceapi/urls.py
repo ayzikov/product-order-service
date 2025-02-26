@@ -1,8 +1,19 @@
 # installed
 from django.urls import path, include
-# local
-from apps.orderserviceapi.views import provider_views, buyer_views, product_views, order_views
+from unicodedata import category
 
+# local
+from apps.orderserviceapi.views import provider_views, buyer_views, product_views, order_views, category_views
+
+
+buyers_patterns = [
+    path("", buyer_views.BuyerRegisterView.as_view(), name="register"),
+    path('confirm-email/<str:token>/<str:uid>', buyer_views.BuyerConfirmEmailView.as_view(), name="confirm_email"),
+]
+
+categories_patterns = [
+    path("", category_views.CategoryCreateView.as_view(), name="create"),
+]
 
 orders_patterns = [
     path("", order_views.OrderListCreateView.as_view(), name="list_create"),
@@ -23,16 +34,13 @@ providers_patterns = [
     path("<int:provider_id>", provider_views.ProviderDetailModifyDeleteView.as_view(), name="detail_modify_delete")
 ]
 
-buyers_patterns = [
-    path("", buyer_views.BuyerRegisterView.as_view(), name="register"),
-    path('confirm-email/<str:token>/<str:uid>', buyer_views.BuyerConfirmEmailView.as_view(), name="confirm_email"),
-]
 
 urlpatterns = [
+    path('buyers/', include((buyers_patterns, 'buyers'))),
+    path('categories/', include((categories_patterns, 'categories'))),
     path('orders/', include((orders_patterns, 'orders'))),
     path('products/', include((products_patterns, 'products'))),
     path('providers/', include((providers_patterns, 'providers'))),
-    path('buyers/', include((buyers_patterns, 'buyers'))),
 ]
 
 app_name = 'orderserviceapi'

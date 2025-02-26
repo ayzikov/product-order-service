@@ -154,3 +154,9 @@ def order_cancel(order_id: int) -> None:
     # удаляем заказ
     order = selectors.order_get(order_id)
     order.delete()
+
+
+# CATEGORY
+def category_create(data: dict) -> models.Category:
+    category = models.Category.objects.create(**data)
+    return category
