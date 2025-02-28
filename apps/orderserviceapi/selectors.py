@@ -30,12 +30,12 @@ def provider_get_list() -> list:
 
 
 # BUYER
-def buyer_get(buyer_id) -> models.Buyer:
+def buyer_get(buyer_id: int) -> models.Buyer:
     return get_object(models.Buyer, id=buyer_id)
 
 
 # PRODUCT
-def product_get(product_id) -> models.Product | None:
+def product_get(product_id: int) -> models.Product | None:
     product = get_object(models.Product, id=product_id)
     return product
 

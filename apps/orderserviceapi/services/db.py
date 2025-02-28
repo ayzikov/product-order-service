@@ -105,8 +105,9 @@ def order_create(data: dict) -> models.Order:
     order = models.Order.objects.create(**data)
 
     # отправка email покупателю
-
-    #==========================
+    tasks.send_order_mail_task.delay(
+        buyer_id=data.get("buyer").id
+    )
 
     return order
 
