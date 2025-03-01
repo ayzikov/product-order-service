@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 # local
 from apps.orderserviceapi import serializers as app_serializers
-from apps.orderserviceapi.models import Buyer
 from apps.orderserviceapi.services import db
 
 

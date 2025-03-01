@@ -17,10 +17,12 @@ def provider_create(data: dict) -> models.Provider:
     provider = models.Provider.objects.create(**data)
     return provider
 
+
 def provider_modify(provider_id: int, data: dict) -> models.Provider:
     """ Изменение поставщика """
     models.Provider.objects.filter(id=provider_id).update(**data)
     return selectors.provider_get(provider_id)
+
 
 def provider_delete(provider_id: int) -> None:
     """ Удаление поставщика """
@@ -41,6 +43,7 @@ def buyer_create(request: Request, data: dict) -> models.Buyer:
     )
 
     return buyer
+
 
 def buyer_confirm_email(token, uid) -> bool | None:
     """ Подтверждение email """
@@ -63,15 +66,18 @@ def product_create(data: dict) -> models.Product:
 
     return product
 
+
 def remaining_stock_create(product_id: int) -> models.RemainingStock:
     """ Создание remaining stock """
     remaining_stock = models.RemainingStock.objects.create(product_id=product_id)
     return remaining_stock
 
+
 def product_modify(data: dict, product_id: int) -> models.Product:
     """ Изменение товара """
     models.Product.objects.filter(id=product_id).update(**data)
     return selectors.product_get(product_id)
+
 
 def product_remaining_stock_add(quantity: int, product_id: int) -> models.Product:
     """ Добавление товара на склад """
@@ -82,6 +88,7 @@ def product_remaining_stock_add(quantity: int, product_id: int) -> models.Produc
     product = selectors.product_get(product_id)
     return product
 
+
 def product_remaining_stock_reduce(data: dict, product_id: int) -> models.Product:
     """ Убрать товар со склада """
     remaining_stock = selectors.product_remaining_stock_get(product_id)
@@ -90,6 +97,7 @@ def product_remaining_stock_reduce(data: dict, product_id: int) -> models.Produc
 
     product = selectors.product_get(product_id)
     return product
+
 
 def product_delete(product_id: int) -> None:
     """ Удаление товара """
@@ -110,6 +118,7 @@ def order_create(data: dict) -> models.Order:
     )
 
     return order
+
 
 def product_in_order_create(data: dict, order_id: int, product_id: int) -> models.ProductOrder:
     """ Создание ProductInOrder """
@@ -139,6 +148,7 @@ def order_confirm(order_id: int) -> None:
     """ Подтверждение заказа """
     order = selectors.order_get(order_id)
     order.delete()
+
 
 def order_cancel(order_id: int) -> None:
     """ Отмена заказа """

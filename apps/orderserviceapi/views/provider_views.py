@@ -58,7 +58,6 @@ class ProviderListCreateView(APIView):
 
         return Response(data, status=status.HTTP_200_OK)
 
-    
     def post(self, request: Request):
         """
         Создание

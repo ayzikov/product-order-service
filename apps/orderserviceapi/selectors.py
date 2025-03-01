@@ -13,6 +13,7 @@ def get_object(model_or_queryset, **kwargs):
     except Http404:
         return None
 
+
 def get_objects_list(model, **kwargs):
     try:
         return get_list_or_404(model, **kwargs)
@@ -24,6 +25,7 @@ def get_objects_list(model, **kwargs):
 def provider_get(provider_id) -> models.Provider | None:
     provider = get_object(models.Provider, id=provider_id)
     return provider
+
 
 def provider_get_list() -> list:
     return get_objects_list(models.Provider)
@@ -39,6 +41,7 @@ def product_get(product_id: int) -> models.Product | None:
     product = get_object(models.Product, id=product_id)
     return product
 
+
 def product_remaining_stock_get(product_id: int) -> models.RemainingStock:
     remaining_stock = get_object(models.RemainingStock, product=product_id)
     return remaining_stock
@@ -48,8 +51,10 @@ def product_remaining_stock_get(product_id: int) -> models.RemainingStock:
 def order_get(order_id: int) -> models.Order:
     return get_object(models.Order, id=order_id)
 
+
 def product_in_order_get(order_id: int, product_id: int) -> models.ProductOrder:
     return get_object(models.ProductOrder, order=order_id, product=product_id)
+
 
 def products_in_order_get_list(order_id: int) -> list:
     return get_objects_list(models.ProductOrder, order_id=order_id)

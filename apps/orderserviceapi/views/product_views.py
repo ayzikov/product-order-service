@@ -1,7 +1,5 @@
 # base
 # installed
-from itertools import product
-
 from rest_framework import status
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -25,7 +23,6 @@ class ProductDetailModifyDeleteView(APIView):
 
         data = app_serializers.ProductOutputDetailSerializer(product).data
         return Response(data, status=status.HTTP_200_OK)
-
 
     def patch(self, request: Request, product_id: int):
         """

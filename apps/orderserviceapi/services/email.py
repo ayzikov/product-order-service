@@ -17,6 +17,7 @@ def get_activation_url(current_domain, buyer_id) -> tuple[str, str]:
     path = reverse("orderserviceapi:buyers:confirm_email", args=[token, uid])
     return f"http://{current_domain}{path}", buyer.email
 
+
 def send_verifi_mail(current_domain, buyer_id) -> None:
     # Отправляет письмо на почту при регистрации
     try:
@@ -31,6 +32,7 @@ def send_verifi_mail(current_domain, buyer_id) -> None:
         )
     except Exception:
         raise Exception('Ошибка в функции send_verifi_mail')
+
 
 def send_order_mail(buyer_id) -> None:
     # Отправляет письмо на почту при создании заказа
